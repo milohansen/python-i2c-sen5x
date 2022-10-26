@@ -134,7 +134,7 @@ class Sen5xI2cCmdSetTemperatureOffsetParameters(SetTemperatureOffsetParametersGe
 
     Sets the temperature offset parameters for the device.
 
-    .. note:: This configuration is volatile, i.e. the parameters will be
+    .. note:: This configuration is volatile, i.e. the parameters will be
               reverted to their default value of zero after a device reset.
     """
 
@@ -210,11 +210,11 @@ class Sen5xI2cCmdSetWarmStartParameter(SetWarmStartParameterGenerated):
 
     .. note:: This parameter can be changed in any state of the device (and the
               getter immediately returns the new value), but it is applied only
-              the next time starting a measurement, i.e. when sending a "Start
+              the next time starting a measurement, i.e. when sending a "Start
               Measurement" command! So the parameter needs to be set *before* a
               warm-start measurement is started.
 
-    .. note:: This configuration is volatile, i.e. the parameter will be
+    .. note:: This configuration is volatile, i.e. the parameter will be
               reverted to its default value of zero after a device reset.
     """
 
@@ -282,11 +282,11 @@ class Sen5xI2cCmdReadDeviceStatus(ReadDeviceStatusGenerated):
 
     Reads the current device status flags.
 
-    .. note:: The status flags of type "Error" are sticky, i.e. they are not
+    .. note:: The status flags of type "Error" are sticky, i.e. they are not
               cleared automatically even if the error condition no longer
               exists. So they can only be cleared manually with the command
               0xD210 "Read And Clear Device Status" or with a device reset. All
-              other flags are not sticky, i.e. they are cleared automatically
+              other flags are not sticky, i.e. they are cleared automatically
               if the trigger condition disappears.
     """
 

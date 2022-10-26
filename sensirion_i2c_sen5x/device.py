@@ -274,7 +274,7 @@ class Sen5xI2cDevice(I2cDevice):
         All temperatures (``T_Ambient_Compensated``, ``T_Ambient`` and
         ``offset``) in this formula are represented in °C.
 
-        .. note:: This configuration is volatile, i.e. it will be reverted to
+        .. note:: This configuration is volatile, i.e. it will be reverted to
                   the default value after a device reset.
 
         .. attention:: SEN50 does not support this feature.
@@ -332,11 +332,11 @@ class Sen5xI2cDevice(I2cDevice):
 
             This parameter can be changed in any state of the device (and the
             getter immediately returns the new value), but it is applied only
-            the next time starting a measurement, i.e. when sending a "Start
+            the next time starting a measurement, i.e. when sending a "Start
             Measurement" command! So the parameter needs to be set *before* a
             warm-start measurement is started.
 
-        .. note:: This configuration is volatile, i.e. it will be reverted to
+        .. note:: This configuration is volatile, i.e. it will be reverted to
                   the default value after a device reset.
 
         .. attention:: SEN50 does not support this feature.
@@ -385,11 +385,11 @@ class Sen5xI2cDevice(I2cDevice):
 
             This parameter can be changed in any state of the device (and the
             getter immediately returns the new value), but it is applied only
-            the next time starting a measurement, i.e. when sending a "Start
+            the next time starting a measurement, i.e. when sending a "Start
             Measurement" command. So the parameter needs to be set *before* a
             new measurement is started.
 
-        .. note:: This configuration is volatile, i.e. it will be reverted to
+        .. note:: This configuration is volatile, i.e. it will be reverted to
                   the default value after a device reset.
 
         .. attention:: SEN50 does not support this feature.
@@ -442,7 +442,7 @@ class Sen5xI2cDevice(I2cDevice):
                   this command has no effect. In addition, it has no effect if
                   at least one parameter is outside the specified range.
 
-        .. note:: This configuration is volatile, i.e. it will be reverted to
+        .. note:: This configuration is volatile, i.e. it will be reverted to
                   the default value after a device reset.
 
         .. attention:: SEN50 does not support this feature.
@@ -521,7 +521,7 @@ class Sen5xI2cDevice(I2cDevice):
                   this command has no effect. In addition, it has no effect if
                   at least one parameter is outside the specified range.
 
-        .. note:: This configuration is volatile, i.e. it will be reverted to
+        .. note:: This configuration is volatile, i.e. it will be reverted to
                   the default value after a device reset.
 
         .. attention:: SEN50 and SEN54 do not support this feature.
@@ -631,7 +631,7 @@ class Sen5xI2cDevice(I2cDevice):
         will be aborted immediately.
 
         .. note:: This command is only available in measure mode with PM
-                  measurement enabled, i.e. only if the fan is already running.
+                  measurement enabled, i.e. only if the fan is already running.
                   In any other state, this command does nothing. In addition,
                   when executing this command while cleaning is already active,
                   the command does nothing.
@@ -660,7 +660,7 @@ class Sen5xI2cDevice(I2cDevice):
         The device will automatically start the fan cleaning when the fan was
         running for this number of seconds.
 
-        .. note:: This configuration is volatile, i.e. it will be reverted to
+        .. note:: This configuration is volatile, i.e. it will be reverted to
                   the default value after a device reset.
 
         :param int interval_s:
