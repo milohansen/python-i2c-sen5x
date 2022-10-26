@@ -33,6 +33,7 @@ class Sen5xI2cCmdBase(SensirionI2cCommand):
     """
     SEN5x I²C base command.
     """
+
     def __init__(self, command, tx_data, rx_length, read_delay, timeout,
                  post_processing_time=0.0):
         """
@@ -97,7 +98,7 @@ class Sen5xI2cCmdStartMeasurement(Sen5xI2cCmdBase):
     higher than 1.0, this command enables PM measurement without affecting the
     already running RH/T/VOC/NOx measurements (except that the "data
     ready"-flag will be cleared). If the device is in idle mode, this command
-    starts the normal measurement. In any other case (e.g. normal measure mode
+    starts the normal measurement. In any other case (e.g. normal measure mode
     already running), this command has no effect.
     """
 
@@ -131,7 +132,7 @@ class Sen5xI2cCmdStartMeasurementWithoutPm(Sen5xI2cCmdBase):
     higher than 1.0, this command disables PM measurement without affecting the
     already running RH/T/VOC/NOx measurements (except that the "data
     ready"-flag will be cleared). If the device is in idle mode, this command
-    starts the measurement without PM. In any other case (e.g. measure mode
+    starts the measurement without PM. In any other case (e.g. measure mode
     without PM already running), this command has no effect.
     """
 
@@ -221,7 +222,8 @@ class Sen5xI2cCmdReadDataReady(Sen5xI2cCmdBase):
 
         # convert raw received data into proper data types
         padding = int(unpack(">B", checked_data[0:1])[0])  # uint8
-        data_ready = bool(unpack(">?", checked_data[1:2])[0])  # bool
+        # ">?" doesn't work on pico, but outputs a 0 for false so ">B" produces the same result
+        data_ready = bool(unpack(">B", checked_data[1:2])[0])  # bool
         return padding, \
             data_ready
 
@@ -235,7 +237,7 @@ class Sen5xI2cCmdReadMeasuredValues(Sen5xI2cCmdBase):
     The command 0x0202 "Read Data Ready" can be used to check if new data is
     available since the last read operation. If no new data is available, the
     previous values will be returned again. If no data is available at all
-    (e.g. measurement not running for at least one second), all values will be
+    (e.g. measurement not running for at least one second), all values will be
     at their upper limit (0xFFFF for ``uint16``, 0x7FFF for ``int16``).
     """
 
@@ -302,12 +304,17 @@ class Sen5xI2cCmdReadMeasuredValues(Sen5xI2cCmdBase):
         checked_data = Sen5xI2cCmdBase.interpret_response(self, data)
 
         # convert raw received data into proper data types
-        mass_concentration_pm1p0 = int(unpack(">H", checked_data[0:2])[0])  # uint16
-        mass_concentration_pm2p5 = int(unpack(">H", checked_data[2:4])[0])  # uint16
-        mass_concentration_pm4p0 = int(unpack(">H", checked_data[4:6])[0])  # uint16
-        mass_concentration_pm10p0 = int(unpack(">H", checked_data[6:8])[0])  # uint16
+        mass_concentration_pm1p0 = int(
+            unpack(">H", checked_data[0:2])[0])  # uint16
+        mass_concentration_pm2p5 = int(
+            unpack(">H", checked_data[2:4])[0])  # uint16
+        mass_concentration_pm4p0 = int(
+            unpack(">H", checked_data[4:6])[0])  # uint16
+        mass_concentration_pm10p0 = int(
+            unpack(">H", checked_data[6:8])[0])  # uint16
         ambient_humidity = int(unpack(">h", checked_data[8:10])[0])  # int16
-        ambient_temperature = int(unpack(">h", checked_data[10:12])[0])  # int16
+        ambient_temperature = int(
+            unpack(">h", checked_data[10:12])[0])  # int16
         voc_index = int(unpack(">h", checked_data[12:14])[0])  # int16
         nox_index = int(unpack(">h", checked_data[14:16])[0])  # int16
         return mass_concentration_pm1p0, \
@@ -337,7 +344,7 @@ class Sen5xI2cCmdStartFanCleaning(Sen5xI2cCmdBase):
     be aborted immediately.
 
     .. note:: This command is only available in measure mode with PM
-              measurement enabled, i.e. only if the fan is already running. In
+              measurement enabled, i.e. only if the fan is already running. In
               any other state, this command does nothing.
     """
 
@@ -436,8 +443,8 @@ class Sen5xI2cCmdSetTemperatureOffsetParameters(Sen5xI2cCmdBase):
         super(Sen5xI2cCmdSetTemperatureOffsetParameters, self).__init__(
             command=0x60B2,
             tx_data=b"".join([pack(">h", offset),
-                           pack(">h", slope),
-                           pack(">H", time_constant)]),
+                              pack(">h", slope),
+                              pack(">H", time_constant)]),
             rx_length=None,
             read_delay=0.0,
             timeout=0,
@@ -494,7 +501,7 @@ class Sen5xI2cCmdSetWarmStartParameter(Sen5xI2cCmdBase):
 
     .. note:: This parameter can be changed in any state of the device (and the
               getter immediately returns the new value), but it is applied only
-              the next time starting a measurement, i.e. when sending a "Start
+              the next time starting a measurement, i.e. when sending a "Start
               Measurement" command! So the parameter needs to be set *before* a
               warm-start measurement is started.
     """
@@ -573,9 +580,12 @@ class Sen5xI2cCmdGetVocAlgorithmTuningParameters(Sen5xI2cCmdBase):
 
         # convert raw received data into proper data types
         index_offset = int(unpack(">h", checked_data[0:2])[0])  # int16
-        learning_time_offset_hours = int(unpack(">h", checked_data[2:4])[0])  # int16
-        learning_time_gain_hours = int(unpack(">h", checked_data[4:6])[0])  # int16
-        gating_max_duration_minutes = int(unpack(">h", checked_data[6:8])[0])  # int16
+        learning_time_offset_hours = int(
+            unpack(">h", checked_data[2:4])[0])  # int16
+        learning_time_gain_hours = int(
+            unpack(">h", checked_data[4:6])[0])  # int16
+        gating_max_duration_minutes = int(
+            unpack(">h", checked_data[6:8])[0])  # int16
         std_initial = int(unpack(">h", checked_data[8:10])[0])  # int16
         gain_factor = int(unpack(">h", checked_data[10:12])[0])  # int16
         return index_offset, \
@@ -630,11 +640,11 @@ class Sen5xI2cCmdSetVocAlgorithmTuningParameters(Sen5xI2cCmdBase):
         super(Sen5xI2cCmdSetVocAlgorithmTuningParameters, self).__init__(
             command=0x60D0,
             tx_data=b"".join([pack(">h", index_offset),
-                           pack(">h", learning_time_offset_hours),
-                           pack(">h", learning_time_gain_hours),
-                           pack(">h", gating_max_duration_minutes),
-                           pack(">h", std_initial),
-                           pack(">h", gain_factor)]),
+                              pack(">h", learning_time_offset_hours),
+                              pack(">h", learning_time_gain_hours),
+                              pack(">h", gating_max_duration_minutes),
+                              pack(">h", std_initial),
+                              pack(">h", gain_factor)]),
             rx_length=None,
             read_delay=0.0,
             timeout=0,
@@ -698,9 +708,12 @@ class Sen5xI2cCmdGetNoxAlgorithmTuningParameters(Sen5xI2cCmdBase):
 
         # convert raw received data into proper data types
         index_offset = int(unpack(">h", checked_data[0:2])[0])  # int16
-        learning_time_offset_hours = int(unpack(">h", checked_data[2:4])[0])  # int16
-        learning_time_gain_hours = int(unpack(">h", checked_data[4:6])[0])  # int16
-        gating_max_duration_minutes = int(unpack(">h", checked_data[6:8])[0])  # int16
+        learning_time_offset_hours = int(
+            unpack(">h", checked_data[2:4])[0])  # int16
+        learning_time_gain_hours = int(
+            unpack(">h", checked_data[4:6])[0])  # int16
+        gating_max_duration_minutes = int(
+            unpack(">h", checked_data[6:8])[0])  # int16
         std_initial = int(unpack(">h", checked_data[8:10])[0])  # int16
         gain_factor = int(unpack(">h", checked_data[10:12])[0])  # int16
         return index_offset, \
@@ -755,11 +768,11 @@ class Sen5xI2cCmdSetNoxAlgorithmTuningParameters(Sen5xI2cCmdBase):
         super(Sen5xI2cCmdSetNoxAlgorithmTuningParameters, self).__init__(
             command=0x60E1,
             tx_data=b"".join([pack(">h", index_offset),
-                           pack(">h", learning_time_offset_hours),
-                           pack(">h", learning_time_gain_hours),
-                           pack(">h", gating_max_duration_minutes),
-                           pack(">h", std_initial),
-                           pack(">h", gain_factor)]),
+                              pack(">h", learning_time_offset_hours),
+                              pack(">h", learning_time_gain_hours),
+                              pack(">h", gating_max_duration_minutes),
+                              pack(">h", std_initial),
+                              pack(">h", gain_factor)]),
             rx_length=None,
             read_delay=0.0,
             timeout=0,
@@ -815,7 +828,7 @@ class Sen5xI2cCmdSetRhtAccelerationMode(Sen5xI2cCmdBase):
 
     .. note:: This parameter can be changed in any state of the device (and the
               getter immediately returns the new value), but it is applied only
-              the next time starting a measurement, i.e. when sending a "Start
+              the next time starting a measurement, i.e. when sending a "Start
               Measurement" command. So the parameter needs to be set *before* a
               new measurement is started.
     """
@@ -893,7 +906,7 @@ class Sen5xI2cCmdSetVocAlgorithmState(Sen5xI2cCmdBase):
 
     .. note:: This command is only available in idle mode and the state will be
               applied only once when starting the next measurement. Any further
-              measurements (i.e. when stopping and restarting the measure mode)
+              measurements (i.e. when stopping and restarting the measure mode)
               will reset the state to initial values. In measure mode, this
               command has no effect.
     """
@@ -1018,7 +1031,8 @@ class Sen5xI2cCmdGetProductName(Sen5xI2cCmdBase):
         checked_data = Sen5xI2cCmdBase.interpret_response(self, data)
 
         # convert raw received data into proper data types
-        product_name = str(checked_data[0:32].decode('utf-8').rstrip('\0'))  # string<32>
+        product_name = str(checked_data[0:32].decode(
+            'utf-8').rstrip('\0'))  # string<32>
         return product_name
 
 
@@ -1059,7 +1073,8 @@ class Sen5xI2cCmdGetSerialNumber(Sen5xI2cCmdBase):
         checked_data = Sen5xI2cCmdBase.interpret_response(self, data)
 
         # convert raw received data into proper data types
-        serial_number = str(checked_data[0:32].decode('utf-8').rstrip('\0'))  # string<32>
+        serial_number = str(checked_data[0:32].decode(
+            'utf-8').rstrip('\0'))  # string<32>
         return serial_number
 
 
@@ -1119,7 +1134,8 @@ class Sen5xI2cCmdGetVersion(Sen5xI2cCmdBase):
         # convert raw received data into proper data types
         firmware_major = int(unpack(">B", checked_data[0:1])[0])  # uint8
         firmware_minor = int(unpack(">B", checked_data[1:2])[0])  # uint8
-        firmware_debug = bool(unpack(">?", checked_data[2:3])[0])  # bool
+        # ">?" doesn't work on pico, but outputs a 0 for false so ">B" produces the same result
+        firmware_debug = bool(unpack(">B", checked_data[2:3])[0])  # bool
         hardware_major = int(unpack(">B", checked_data[3:4])[0])  # uint8
         hardware_minor = int(unpack(">B", checked_data[4:5])[0])  # uint8
         protocol_major = int(unpack(">B", checked_data[5:6])[0])  # uint8
@@ -1148,11 +1164,11 @@ class Sen5xI2cCmdReadDeviceStatus(Sen5xI2cCmdBase):
     values. For details about the available flags, refer to the device status
     flags documentation.
 
-    .. note:: The status flags of type "Error" are sticky, i.e. they are not
+    .. note:: The status flags of type "Error" are sticky, i.e. they are not
               cleared automatically even if the error condition no longer
               exists. So they can only be cleared manually with the command
               0xD210 "Read And Clear Device Status" or with a device reset. All
-              other flags are not sticky, i.e. they are cleared automatically
+              other flags are not sticky, i.e. they are cleared automatically
               if the trigger condition disappears.
     """
 
@@ -1252,4 +1268,3 @@ class Sen5xI2cCmdDeviceReset(Sen5xI2cCmdBase):
             timeout=0,
             post_processing_time=0.1,
         )
-
